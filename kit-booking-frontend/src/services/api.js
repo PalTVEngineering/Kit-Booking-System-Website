@@ -8,3 +8,7 @@ const API = axios.create({
 export const fetchUsers = () => API.get("/user/");
 export const addUsers = (data) => API.post("/user/create_user", data);
 
+//Kit API Calls
+export const fetchKits = () => API.get("/kit/");
+
+
