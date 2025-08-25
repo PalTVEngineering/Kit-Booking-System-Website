@@ -2,19 +2,22 @@ import BuildIcon from "@mui/icons-material/Build";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import WidgetsIcon from "@mui/icons-material/Widgets";
 import {
-    Checkbox,
-    Container,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Paper,
-    Typography,
-    useMediaQuery
+  Button,
+  Checkbox,
+  Container,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Typography,
+  useMediaQuery
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchKits } from "../services/api";
+
 
 function HomePage() {
   const [kits, setKits] = useState([]);
@@ -48,6 +51,7 @@ function HomePage() {
         return <WidgetsIcon />;
     }
   };
+  const navigate = useNavigate();
 
   return (
     <Container maxWidth="sm" sx={{ mt: isMobile ? 3 : 5, px: 2 }}>
@@ -107,6 +111,17 @@ function HomePage() {
           ))}
         </List>
       </Paper>
+      <Button
+        type="button"
+        variant="contained"
+        color="primary"
+        fullWidth
+        sx={{ mt: 2 }}
+        onClick={() => navigate("/booking", { state: { selectedKits: kits.filter(k => selectedKits.includes(k.id)) } })}
+      >
+        Proceed to Book
+      </Button>
+
     </Container>
   );
 }
