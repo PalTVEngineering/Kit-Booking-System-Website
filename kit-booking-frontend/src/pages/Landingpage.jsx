@@ -1,14 +1,32 @@
-import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
+import BuildIcon from "@mui/icons-material/Build";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import ExtensionIcon from "@mui/icons-material/Extension";
+import {
+  Box,
+  Button,
+  Container,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { addUsers } from "../services/api";
 
 function LandingPage() {
+  const location = useLocation();
+  const { bookingData } = location.state || {}; // booking info + selectedKits
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: ""
   });
-  const [userId, setUserId] = useState(null); // store user id for future booking
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,28 +35,73 @@ function LandingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await addUsers(formData);
-      setUserId(response.data.id);
-      alert("User details saved successfully!");
-      setFormData({ first_name: "", last_name: "", email: "" });
+      // 1. Create user
+      const userRes = await addUsers(formData);
+      const userId = userRes.data.id;
+
+      // 2. Send booking (kits handled later in booking_kits table)
+      const bookingPayload = {
+        user_id: userId,
+        start_time: `${bookingData.date} ${bookingData.start_time}:00`, // "2025-08-25 09:00:00"
+        end_time: `${bookingData.date} ${bookingData.end_time}:00`,     // "2025-08-25 17:00:00"
+      };
+
+      await axios.post("http://localhost:5000/api/bookings/create", bookingPayload);
+
+      alert("Booking confirmed!");
     } catch (error) {
       console.error(error);
-      alert("Error saving user details.");
+      alert("Error confirming booking.");
+    }
+  };
+
+  // Choose icon for kit type
+  const getKitIcon = (type) => {
+    switch (type) {
+      case "camera":
+        return <CameraAltIcon />;
+      case "equipment":
+        return <BuildIcon />;
+      default:
+        return <ExtensionIcon />; // misc
     }
   };
 
   return (
     <Container maxWidth="sm">
       <Typography variant="h3" align="center" gutterBottom sx={{ mt: 5 }}>
-        PalTV Kit Booking
+        Confirm Your Booking
       </Typography>
 
       <Paper elevation={3} sx={{ p: 4, mt: 3, borderRadius: 2 }}>
-        <Typography variant="h5" gutterBottom>
-          Enter Your Details
+        {/* Booking Summary */}
+        <Typography variant="h6" gutterBottom>
+          Selected Kits
+        </Typography>
+        <List>
+          {bookingData?.kits?.length ? (
+            bookingData.kits.map((kit) => (
+              <ListItem key={kit.id}>
+                <ListItemIcon>{getKitIcon(kit.type)}</ListItemIcon>
+                <ListItemText primary={kit.name} />
+              </ListItem>
+            ))
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No kits selected.
+            </Typography>
+          )}
+        </List>
+
+        <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+          Booking Date & Time
+        </Typography>
+        <Typography>
+          {bookingData?.date} | {bookingData?.start_time} → {bookingData?.end_time}
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit}>
+        {/* User Details Form */}
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <TextField
             fullWidth
             label="First Name"
@@ -77,13 +140,6 @@ function LandingPage() {
             Confirm Booking
           </Button>
         </Box>
-
-        {/* For now, just show the saved user id */}
-        {userId && (
-          <Typography sx={{ mt: 2 }} color="success.main">
-            User saved! ID: {userId}
-          </Typography>
-        )}
       </Paper>
     </Container>
   );
