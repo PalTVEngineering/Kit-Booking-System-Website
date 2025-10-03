@@ -1,9 +1,9 @@
 import {
-    Box,
-    Button,
-    Container,
-    Paper,
-    Typography
+  Box,
+  Button,
+  Container,
+  Paper,
+  Typography
 } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
@@ -35,8 +35,8 @@ function BookingPage() {
     };
 
 
-    // Go to landing page (/confirm) with booking data
-    navigate("/confirm", { state: { bookingData } });
+    // Go to landing page (/finish) with booking data
+    navigate("/finish", { state: { bookingData } });
   };
 
   return (
