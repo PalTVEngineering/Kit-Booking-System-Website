@@ -1,64 +1,17 @@
-import BuildIcon from "@mui/icons-material/Build";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import WidgetsIcon from "@mui/icons-material/Widgets";
-import {
-  Button,
-  Checkbox,
-  Container,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-  Typography,
-  useMediaQuery
-} from "@mui/material";
+import { Box, Button, Container, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchKits } from "../services/api";
-
 
 function HomePage() {
-  const [kits, setKits] = useState([]);
-  const [selectedKits, setSelectedKits] = useState([]);
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  useEffect(() => {
-    fetchKits()
-      .then((res) => setKits(res.data))
-      .catch((err) => console.error("Error fetching kits:", err));
-  }, []);
-
-  const handleToggle = (id) => {
-    setSelectedKits((prev) =>
-      prev.includes(id) ? prev.filter((kitId) => kitId !== id) : [...prev, id]
-    );
-  };
-
-  const getIcon = (type) => {
-    switch (type.toLowerCase()) {
-      case "camera":
-      case "cameras":
-        return <CameraAltIcon />;
-      case "equipment":
-        return <BuildIcon />;
-      case "misc":
-        return <WidgetsIcon />;
-      default:
-        return <WidgetsIcon />;
-    }
-  };
   const navigate = useNavigate();
 
   return (
-    <Container maxWidth="sm" sx={{ mt: isMobile ? 3 : 5, px: 2 }}>
+    <Container maxWidth="sm" sx={{ mt: isMobile ? 4 : 8, textAlign: "center" }}>
       {/* Title */}
       <Typography
         variant={isMobile ? "h4" : "h3"}
-        align="center"
         gutterBottom
         sx={{ fontWeight: "bold" }}
       >
@@ -69,59 +22,31 @@ function HomePage() {
       <Typography
         variant={isMobile ? "h6" : "h5"}
         gutterBottom
-        sx={{ mt: isMobile ? 2 : 4 }}
+        sx={{ mb: isMobile ? 3 : 5, color: "text.secondary" }}
       >
-        What kit do you need?
+        What would you like to do?
       </Typography>
 
-      {/* Kit List */}
-      <Paper elevation={3} sx={{ mt: 2, borderRadius: 2 }}>
-        <List>
-          {kits.map((kit) => (
-            <ListItem
-              key={kit.id}
-              button
-              onClick={() => handleToggle(kit.id)}
-              sx={{
-                bgcolor: selectedKits.includes(kit.id)
-                  ? "action.selected"
-                  : "inherit",
-                py: isMobile ? 1.5 : 2, // bigger touch area on mobile
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: isMobile ? 40 : 56 }}>
-                {getIcon(kit.type)}
-              </ListItemIcon>
-              <ListItemText
-                primary={kit.name}
-                primaryTypographyProps={{
-                  fontSize: isMobile ? "1rem" : "1.2rem",
-                }}
-              />
-              <Checkbox
-                edge="end"
-                checked={selectedKits.includes(kit.id)}
-                tabIndex={-1}
-                disableRipple
-                sx={{
-                  "& .MuiSvgIcon-root": { fontSize: isMobile ? 20 : 28 }, // smaller/larger checkbox depending on screen
-                }}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-      <Button
-        type="button"
-        variant="contained"
-        color="primary"
-        fullWidth
-        sx={{ mt: 2 }}
-        onClick={() => navigate("/booking", { state: { selectedKits: kits.filter(k => selectedKits.includes(k.id)) } })}
-      >
-        Proceed to Book
-      </Button>
+      {/* Buttons */}
+      <Box display="flex" flexDirection="column" gap={3}>
+        <Button
+          variant="contained"
+          color="primary"
+          size={isMobile ? "medium" : "large"}
+          onClick={() => navigate("/kitSelection")}
+        >
+          Book Kit
+        </Button>
 
+        <Button
+          variant="outlined"
+          color="secondary"
+          size={isMobile ? "medium" : "large"}
+          onClick={() => navigate("/return")}
+        >
+          Return Kit
+        </Button>
+      </Box>
     </Container>
   );
 }

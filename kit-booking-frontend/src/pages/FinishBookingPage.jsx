@@ -15,12 +15,13 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { addUsers } from "../services/api";
 
-function LandingPage() {
+function FinishBookingPage() {
   const location = useLocation();
   const { bookingData } = location.state || {}; // booking info + selectedKits
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -44,11 +45,13 @@ function LandingPage() {
         user_id: userId,
         start_time: `${bookingData.date} ${bookingData.start_time}:00`, // "2025-08-25 09:00:00"
         end_time: `${bookingData.date} ${bookingData.end_time}:00`,     // "2025-08-25 17:00:00"
+        email: formData.email,
+        kits: bookingData.kits,
       };
 
       await axios.post("http://localhost:5000/api/bookings/create", bookingPayload);
 
-      alert("Booking confirmed!");
+      navigate("/confirmed")
     } catch (error) {
       console.error(error);
       alert("Error confirming booking.");
@@ -145,4 +148,4 @@ function LandingPage() {
   );
 }
 
-export default LandingPage;
+export default FinishBookingPage;
