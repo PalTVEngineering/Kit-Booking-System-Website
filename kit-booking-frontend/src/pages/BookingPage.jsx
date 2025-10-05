@@ -3,7 +3,7 @@ import {
   Button,
   Container,
   Paper,
-  Typography
+  Typography,
 } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
@@ -14,30 +14,29 @@ function BookingPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // kits selected from HomePage (passed via navigate state)
-  const { selectedKits } = location.state || { selectedKits: [] };
+  // Kits and quantities from KitSelectionPage
+  const { kitQuantities = [] } = location.state || {};
 
   const [date, setDate] = useState(dayjs());
   const [startTime, setStartTime] = useState(dayjs().hour(9).minute(0));
   const [endTime, setEndTime] = useState(dayjs().hour(17).minute(0));
 
   const handleProceed = () => {
-    if (endTime.isBefore(startTime)) {
-      alert("End time cannot be earlier than start time!");
-      return;
-    }
-
-    const bookingData = {
-      kits: selectedKits,
-      date: date.format("YYYY-MM-DD"),
-      start_time: startTime.format("HH:mm"),
-      end_time: endTime.format("HH:mm"),
-    };
+  if (endTime.isBefore(startTime)) {
+    alert("End time cannot be earlier than start time!");
+    return;
+  }
 
 
-    // Go to landing page (/finish) with booking data
-    navigate("/finish", { state: { bookingData } });
+  const bookingData = {
+    kitQuantities: kitQuantities, // Use the array directly
+    date: date.format("YYYY-MM-DD"),
+    start_time: startTime.format("HH:mm"),
+    end_time: endTime.format("HH:mm"),
   };
+
+  navigate("/finish", { state: { bookingData } });
+};
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
@@ -46,11 +45,13 @@ function BookingPage() {
       </Typography>
 
       <Paper elevation={3} sx={{ p: 4, mt: 3, borderRadius: 2 }}>
+        {/* Date and Time Pickers */}
         <Box sx={{ mb: 3 }}>
           <Typography gutterBottom>Select Date</Typography>
           <DatePicker
             label="Booking Date"
             value={date}
+            format="DD/MM/YYYY"
             onChange={(newValue) => setDate(newValue)}
             slotProps={{ textField: { fullWidth: true } }}
           />
@@ -62,6 +63,7 @@ function BookingPage() {
             label="Start Time"
             value={startTime}
             onChange={(newValue) => setStartTime(newValue)}
+            views={['hours', 'minutes']}
             slotProps={{ textField: { fullWidth: true } }}
           />
         </Box>
@@ -72,6 +74,7 @@ function BookingPage() {
             label="End Time"
             value={endTime}
             onChange={(newValue) => setEndTime(newValue)}
+            views={['hours', 'minutes']}
             slotProps={{ textField: { fullWidth: true } }}
           />
         </Box>

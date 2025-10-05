@@ -1,30 +1,37 @@
 import BuildIcon from "@mui/icons-material/Build";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import WidgetsIcon from "@mui/icons-material/Widgets";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
   Button,
   Checkbox,
   Container,
+  FormControl,
+  InputLabel,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  MenuItem,
   Paper,
+  Select,
   Typography,
-  useMediaQuery
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchKits } from "../services/api";
 
-
 function KitSelectionPage() {
   const [kits, setKits] = useState([]);
-  const [selectedKits, setSelectedKits] = useState([]);
+  const [selectedKits, setSelectedKits] = useState([]); // unique IDs for DB
+  const [kitQuantities, setKitQuantities] = useState({}); // id → quantity chosen
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchKits()
@@ -32,87 +39,188 @@ function KitSelectionPage() {
       .catch((err) => console.error("Error fetching kits:", err));
   }, []);
 
-  const handleToggle = (id) => {
+  // A simple change to manage both states at once
+  const handleToggleKit = (kit) => {
+    const kitId = kit.id;
+    const isSelected = selectedKits.includes(kitId);
+
+    // 1. Update the list of selected IDs
     setSelectedKits((prev) =>
-      prev.includes(id) ? prev.filter((kitId) => kitId !== id) : [...prev, id]
+      isSelected ? prev.filter((id) => id !== kitId) : [...prev, kitId]
+    );
+
+    // 2. Update the quantities object
+    setKitQuantities((prev) => {
+      const updated = { ...prev };
+      if (isSelected) {
+        // If it was selected, remove it
+        delete updated[kitId];
+      } else {
+        // If it wasn't selected, add it with quantity 1
+        updated[kitId] = { ...kit, quantity: 1 };
+      }
+      return updated;
+    });
+  };
+
+  // Handle quantity selection for multi kits
+  const handleQuantityChange = (kit, qty) => {
+  // If quantity is greater than 0, update or add the kit
+  if (qty > 0) {
+    setKitQuantities((prev) => ({
+      ...prev,
+      [kit.id]: { ...kit, quantity: qty },
+    }));
+    // Ensure the ID is in the selectedKits array
+    if (!selectedKits.includes(kit.id)) {
+      setSelectedKits((prev) => [...prev, kit.id]);
+    }
+  } else {
+    // If quantity is 0, remove the kit completely
+    setSelectedKits((prev) => prev.filter((id) => id !== kit.id));
+    setKitQuantities((prev) => {
+      const updated = { ...prev };
+      delete updated[kit.id];
+      return updated;
+    });
+  }
+};
+
+  const getIcon = (type) => {
+    if (type.toLowerCase().includes("camera")) return <CameraAltIcon />;
+    if (type.toLowerCase().includes("sound")) return <MusicNoteIcon />;
+    if (type.toLowerCase().includes("light")) return <LightModeIcon />;
+    return <BuildIcon />;
+  };
+
+  const grouped = {
+    Camera: {
+      main: kits.filter((k) => k.type === "Camera"),
+      equipment: kits.filter((k) => k.type.startsWith("Camera Equipment")),
+      lens: kits.filter((k) => k.type === "Camera Lens"),
+    },
+    Sound: kits.filter((k) => k.type.toLowerCase().startsWith("sound")),
+    Lighting: kits.filter((k) => k.type.toLowerCase().includes("lighting")),
+  };
+
+  const handleProceed = () => {
+    // This is now simple and always correct
+    const kitQuantitiesArray = Object.values(kitQuantities);
+
+    navigate("/booking", {
+      state: {
+        kitQuantities: kitQuantitiesArray, // For email summary
+      },
+  });
+};
+
+  const renderKitItem = (kit) => {
+    const match = kit.type.match(/\((\d+)\)/); // e.g. "Sound (3)"
+    const maxQty = match ? parseInt(match[1], 10) : 1;
+
+    return (
+      <ListItem key={kit.id}>
+        <ListItemIcon>{getIcon(kit.type)}</ListItemIcon>
+        <ListItemText primary={kit.name} />
+        {maxQty > 1 ? (
+          <FormControl size="small" sx={{ width: 80 }}>
+            <InputLabel>Qty</InputLabel>
+            <Select
+              value={kitQuantities[kit.id]?.quantity || ""}
+              label="Qty"
+              onChange={(e) => handleQuantityChange(kit, Number(e.target.value))}
+            >
+              <MenuItem value="">0</MenuItem>
+              {[...Array(maxQty)].map((_, i) => (
+                <MenuItem key={i + 1} value={i + 1}>
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : (
+        <Checkbox
+          edge="end"
+          checked={selectedKits.includes(kit.id)}
+          // Pass the whole kit object, not just the ID
+          onChange={() => handleToggleKit(kit)}
+        />
+        )}
+      </ListItem>
     );
   };
 
-  const getIcon = (type) => {
-    switch (type.toLowerCase()) {
-      case "camera":
-      case "cameras":
-        return <CameraAltIcon />;
-      case "equipment":
-        return <BuildIcon />;
-      case "misc":
-        return <WidgetsIcon />;
-      default:
-        return <WidgetsIcon />;
-    }
-  };
-  const navigate = useNavigate();
-
   return (
-    <Container maxWidth="sm" sx={{ mt: isMobile ? 3 : 5, px: 2 }}>
-      {/* Title */}
-      <Typography
-        variant={isMobile ? "h4" : "h3"}
-        align="center"
-        gutterBottom
-        sx={{ fontWeight: "bold" }}
-      >
-        What kit do you need?
+    <Container maxWidth="md" sx={{ mt: 5 }}>
+      <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: "bold" }}>
+        Select Your Kits
       </Typography>
 
-      {/* Kit List */}
-      <Paper elevation={3} sx={{ mt: 2, borderRadius: 2 }}>
-        <List>
-          {kits.map((kit) => (
-            <ListItem
-              key={kit.id}
-              button
-              onClick={() => handleToggle(kit.id)}
-              sx={{
-                bgcolor: selectedKits.includes(kit.id)
-                  ? "action.selected"
-                  : "inherit",
-                py: isMobile ? 1.5 : 2, // bigger touch area on mobile
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: isMobile ? 40 : 56 }}>
-                {getIcon(kit.type)}
-              </ListItemIcon>
-              <ListItemText
-                primary={kit.name}
-                primaryTypographyProps={{
-                  fontSize: isMobile ? "1rem" : "1.2rem",
-                }}
-              />
-              <Checkbox
-                edge="end"
-                checked={selectedKits.includes(kit.id)}
-                tabIndex={-1}
-                disableRipple
-                sx={{
-                  "& .MuiSvgIcon-root": { fontSize: isMobile ? 20 : 28 }, // smaller/larger checkbox depending on screen
-                }}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Paper>
-      <Button
-        type="button"
-        variant="contained"
-        color="primary"
-        fullWidth
-        sx={{ mt: 2 }}
-        onClick={() => navigate("/booking", { state: { selectedKits: kits.filter(k => selectedKits.includes(k.id)) } })}
-      >
-        Proceed to Book
-      </Button>
+      <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+        {/* CAMERA */}
+        <Accordion defaultExpanded>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h6">📷 Camera</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            {/* Main cameras first */}
+            {grouped.Camera.main.length > 0 && (
+              <List>{grouped.Camera.main.map(renderKitItem)}</List>
+            )}
 
+            {/* Subgroups */}
+            <Accordion sx={{ mt: 1 }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>Camera Equipment</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <List>{grouped.Camera.equipment.map(renderKitItem)}</List>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ mt: 1 }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>Camera Lenses</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <List>{grouped.Camera.lens.map(renderKitItem)}</List>
+              </AccordionDetails>
+            </Accordion>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* SOUND */}
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h6">🎤 Sound</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <List>{grouped.Sound.map(renderKitItem)}</List>
+          </AccordionDetails>
+        </Accordion>
+
+        {/* LIGHTING */}
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h6">💡 Lighting</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <List>{grouped.Lighting.map(renderKitItem)}</List>
+          </AccordionDetails>
+        </Accordion>
+      </Paper>
+
+      <Box sx={{ mt: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          onClick={handleProceed}
+          disabled={Object.keys(kitQuantities).length === 0}
+        >
+          Proceed to Booking
+        </Button>
+      </Box>
     </Container>
   );
 }
