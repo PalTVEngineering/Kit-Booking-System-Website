@@ -15,10 +15,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import axios from "axios";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addUsers } from "../services/api";
+import { addUsers, createBooking } from "../services/api";
 
 function FinishBookingPage() {
   const location = useLocation();
@@ -51,7 +50,7 @@ function FinishBookingPage() {
         kitQuantities: bookingData.kitQuantities, // This is the single array sent
       };
 
-      await axios.post("http://localhost:5000/api/bookings/create", bookingPayload);
+      await createBooking(bookingPayload);
 
       navigate("/confirmed");
     } catch (error) {

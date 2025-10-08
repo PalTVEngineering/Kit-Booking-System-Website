@@ -13,8 +13,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import axios from "axios";
 import { useState } from "react";
+import { confirmReturn, findUserBookings } from "../services/api";
 
 function ReturnPage() {
   const [step, setStep] = useState(1);
@@ -34,13 +34,10 @@ function ReturnPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/returns/find-user-bookings",
-        {
-          first_name: formData.first_name.trim(),
-          last_name: formData.last_name.trim(),
-        }
-      );
+      const res = await findUserBookings({
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+      });
 
       setBooking(res.data.booking);
       setStep(2);
@@ -70,9 +67,7 @@ function ReturnPage() {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/returns/confirm-return", {
-        bookingId: booking.id, // matches your backend controller
-      });
+      await confirmReturn({ bookingId: booking.id });
 
       setCompleted(true);
     } catch (err) {
