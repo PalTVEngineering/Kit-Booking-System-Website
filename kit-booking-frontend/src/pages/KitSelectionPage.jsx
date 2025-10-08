@@ -95,7 +95,6 @@ function KitSelectionPage() {
 
   const grouped = {
     Camera: {
-      // UPDATED: This now correctly finds "Camera", "Camera (3)", etc.
       main: kits.filter(
         (k) =>
           k.type.startsWith("Camera") &&
@@ -111,12 +110,11 @@ function KitSelectionPage() {
 
 
   const handleProceed = () => {
-    // This is now simple and always correct
     const kitQuantitiesArray = Object.values(kitQuantities);
 
     navigate("/booking", {
       state: {
-        kitQuantities: kitQuantitiesArray, // For email summary
+        kitQuantities: kitQuantitiesArray,
       },
   });
 };
