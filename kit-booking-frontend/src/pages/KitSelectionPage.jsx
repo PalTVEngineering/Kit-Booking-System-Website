@@ -95,13 +95,20 @@ function KitSelectionPage() {
 
   const grouped = {
     Camera: {
-      main: kits.filter((k) => k.type === "Camera"),
+      // UPDATED: This now correctly finds "Camera", "Camera (3)", etc.
+      main: kits.filter(
+        (k) =>
+          k.type.startsWith("Camera") &&
+          !k.type.includes("Equipment") &&
+          !k.type.includes("Lens")
+      ),
       equipment: kits.filter((k) => k.type.startsWith("Camera Equipment")),
       lens: kits.filter((k) => k.type === "Camera Lens"),
     },
     Sound: kits.filter((k) => k.type.toLowerCase().startsWith("sound")),
     Lighting: kits.filter((k) => k.type.toLowerCase().includes("lighting")),
   };
+
 
   const handleProceed = () => {
     // This is now simple and always correct
