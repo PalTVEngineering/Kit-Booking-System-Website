@@ -29,7 +29,7 @@ function BookingPage() {
 
 
   const bookingData = {
-    kitQuantities: kitQuantities, // Use the array directly
+    kitQuantities: kitQuantities,
     date: date.format("YYYY-MM-DD"),
     start_time: startTime.format("HH:mm"),
     end_time: endTime.format("HH:mm"),

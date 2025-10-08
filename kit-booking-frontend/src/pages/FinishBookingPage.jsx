@@ -48,7 +48,7 @@ function FinishBookingPage() {
         start_time: `${bookingData.date} ${bookingData.start_time}:00`,
         end_time: `${bookingData.date} ${bookingData.end_time}:00`,
         email: formData.email,
-        kitQuantities: bookingData.kitQuantities, // This is the single array sent
+        kitQuantities: bookingData.kitQuantities,
       };
 
       await axios.post("http://localhost:5000/api/bookings/create", bookingPayload);
@@ -60,13 +60,12 @@ function FinishBookingPage() {
     }
   };
 
-  // UPDATED: getKitIcon function with more specific icons
   const getKitIcon = (type) => {
     const lower = type.toLowerCase();
     if (lower.includes("camera")) return <CameraAltIcon />;
-    if (lower.includes("sound")) return <MusicNoteIcon />; // Specific for Sound
-    if (lower.includes("light")) return <LightModeIcon />; // Specific for Lighting
-    if (lower.includes("equipment")) return <BuildIcon />; // General equipment
+    if (lower.includes("sound")) return <MusicNoteIcon />;
+    if (lower.includes("light")) return <LightModeIcon />;
+    if (lower.includes("equipment")) return <BuildIcon />;
     return <ExtensionIcon />; // Fallback for other kit types
   };
 
