@@ -149,7 +149,6 @@ function KitSelectionPage() {
         <Checkbox
           edge="end"
           checked={selectedKits.includes(kit.id)}
-          // Pass the whole kit object, not just the ID
           onChange={() => handleToggleKit(kit)}
         />
         )}
