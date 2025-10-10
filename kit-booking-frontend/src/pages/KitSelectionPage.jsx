@@ -103,7 +103,7 @@ function KitSelectionPage() {
           !k.type.includes("Lens")
       ),
       equipment: kits.filter((k) => k.type.startsWith("Camera Equipment")),
-      lens: kits.filter((k) => k.type === "Camera Lens"),
+      lens: kits.filter((k) => k.type.startsWith("Camera Lens")),
     },
     Sound: kits.filter((k) => k.type.toLowerCase().startsWith("sound")),
     Lighting: kits.filter((k) => k.type.toLowerCase().includes("lighting")),
