@@ -25,6 +25,6 @@ jobs:
           cd /opt/booking_system
 
           # Rebuild and restart ONLY the frontend service
-          docker-compose up -d --build frontend
+          docker compose up -d --build frontend
           
           echo "Frontend deployment successful!"
