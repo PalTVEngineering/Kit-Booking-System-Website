@@ -28,6 +28,10 @@ function BookingPage() {
     alert("End time cannot be earlier than start time!");
     return;
   }
+  else if (projectTitle == ""){
+    alert("Project Title cannot be empty");
+    return;
+  }
 
 
   const bookingData = {
