@@ -44,6 +44,7 @@ function FinishBookingPage() {
       // 2. Prepare payload
       const bookingPayload = {
         user_id: userId,
+        project_title: `${bookingData.project_title}`,
         start_time: `${bookingData.date} ${bookingData.start_time}:00`,
         end_time: `${bookingData.date} ${bookingData.end_time}:00`,
         email: formData.email,
