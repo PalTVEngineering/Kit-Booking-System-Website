@@ -4,6 +4,7 @@ import {
   Container,
   Paper,
   Typography,
+  TextField
 } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
@@ -17,6 +18,7 @@ function BookingPage() {
   // Kits and quantities from KitSelectionPage
   const { kitQuantities = [] } = location.state || {};
 
+  const [projectTitle, setProjectTitle] = useState("");
   const [date, setDate] = useState(dayjs());
   const [startTime, setStartTime] = useState(dayjs().hour(9).minute(0));
   const [endTime, setEndTime] = useState(dayjs().hour(17).minute(0));
@@ -26,10 +28,15 @@ function BookingPage() {
     alert("End time cannot be earlier than start time!");
     return;
   }
+  else if (projectTitle == ""){
+    alert("Project Title cannot be empty");
+    return;
+  }
 
 
   const bookingData = {
     kitQuantities: kitQuantities, // Use the array directly
+    project_title: projectTitle,
     date: date.format("YYYY-MM-DD"),
     start_time: startTime.format("HH:mm"),
     end_time: endTime.format("HH:mm"),
@@ -45,6 +52,17 @@ function BookingPage() {
       </Typography>
 
       <Paper elevation={3} sx={{ p: 4, mt: 3, borderRadius: 2 }}>
+
+
+        <Box sx={{ mb: 3 }}>
+          <Typography gutterBottom>Project Title</Typography>
+          <TextField fullWidth
+            required
+            id="outlined-required"
+            label="Project Title"
+            onChange={(e) => setProjectTitle(e.target.value)}
+          />
+        </Box>
         {/* Date and Time Pickers */}
         <Box sx={{ mb: 3 }}>
           <Typography gutterBottom>Select Date</Typography>
