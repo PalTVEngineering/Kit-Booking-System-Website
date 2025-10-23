@@ -150,10 +150,15 @@ function ReturnPage() {
                 Choose a Booking
               </Typography>
               <List>
+                <hr/>
                   {bookingList.map((bkg) => (
                     <ListItemButton
                       key={bkg.id}
                       onClick={() => handleSelectBooking(bkg.id)}
+                      sx={{
+                      borderRadius: 1,
+                      mb: 1,
+                    }}
                       >
                       <ListItemText>
                         Project: {bkg.project_title} <br />
