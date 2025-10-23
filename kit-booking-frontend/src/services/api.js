@@ -18,6 +18,10 @@ export const createBooking = (data) => API.post("/bookings/create", data);
 //Return API Calls
 export const findUserBookings = (data) =>
   API.post("/returns/find-user-bookings", data);
+export const getBookingsAndKit = (data) => API.get("/returns/booking-and-kits/", {
+    params: {
+    "bookingId" : data.bookingId
+  }});
 export const confirmReturn = (data) =>
   API.post("/returns/confirm-return", data);
 
