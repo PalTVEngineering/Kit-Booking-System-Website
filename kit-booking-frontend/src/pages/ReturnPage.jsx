@@ -9,16 +9,18 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListItemButton,
   Paper,
   TextField,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { confirmReturn, findUserBookings } from "../services/api";
+import { confirmReturn, findUserBookings, getBookingsAndKit } from "../services/api";
 
 function ReturnPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ first_name: "", last_name: "" });
+  const [bookingList, setBookingList] = useState([]);
   const [booking, setBooking] = useState(null);
   const [checkedKits, setCheckedKits] = useState([]);
   const [completed, setCompleted] = useState(false);
@@ -29,7 +31,7 @@ function ReturnPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Step 1: Fetch booking
+  // Step 1: Fetch all bookings for user
   const handleFindBooking = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,18 +40,40 @@ function ReturnPage() {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
       });
+      setBookingList(res.data);
+      //if only one booking, skip to step 3
+      if (res.data.length == 1){
+        const bookingRes = await(getBookingsAndKit({bookingId:res.data[0].id}));
+        setBooking(bookingRes.data.booking);
+        setStep(3); 
+      }
+      //otherwise go to step 2 to select a booking
+      else{
+        setStep(2);
+      }
+      } catch (err) {
+        console.error("Error fetching bookings for user:", err);
+        alert(err.response?.data?.error || "Could not find a booking for this name.");
+      } finally {
+        setLoading(false);
+      }
+  };
 
+  //Step 2: Select a booking 
+  const handleSelectBooking = async(bookingID)=>{
+    setLoading(true);
+    try{
+      const res = await(getBookingsAndKit({bookingId:bookingID}));
       setBooking(res.data.booking);
-      setStep(2);
-    } catch (err) {
-      console.error("Error fetching booking:", err);
-      alert(err.response?.data?.error || "Could not find a booking for this name.");
-    } finally {
+      setStep(3)
+    }catch(err){
+      console.error("Error fetching booking data:", err);
+    } finally{
       setLoading(false);
     }
   };
-
-  // Step 2: Handle kit checklist
+  
+  // Step 3: Handle kit checklist
   const handleToggleKit = (kitId) => {
     setCheckedKits((prev) =>
       prev.includes(kitId)
@@ -58,7 +82,7 @@ function ReturnPage() {
     );
   };
 
-  // Step 3: Confirm return
+  // Step 4: Confirm return
   const handleConfirmReturn = async () => {
     if (!booking?.id) {
       alert("No booking found to return.");
@@ -119,9 +143,40 @@ function ReturnPage() {
               </Button>
             </Box>
           )}
+          {/* Step 2: Selecting a booking to return */}
+          {step === 2 && bookingList && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Choose a Booking
+              </Typography>
+              <List>
+                  {bookingList.map((bkg) => (
+                    <ListItemButton
+                      key={bkg.id}
+                      onClick={() => handleSelectBooking(bkg.id)}
+                      >
+                      <ListItemText>
+                        Project: {bkg.project_title} <br />
+                        Booking Date: {new Date(bkg.start_time).toLocaleDateString()} <br />
+                        Time:{" "}
+                        {new Date(bkg.start_time).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        →{" "}
+                        {new Date(bkg.end_time).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </ListItemText>
+                    </ListItemButton>
+                  ))}
+              </List>
+            </>
+          )}
 
-          {/* Step 2: Checklist */}
-          {step === 2 && booking && (
+          {/* Step 3: Checklist */}
+          {step === 3 && booking && (
             <>
               <Typography variant="h6" gutterBottom>
                 Kit to Return
