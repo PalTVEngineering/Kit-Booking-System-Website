@@ -105,30 +105,33 @@ export default function AdminLoginPage() {
     setSubmitError('');
     if (!validate()) return;
 
-    // Quick local mock check: if using the demo credential, skip API and navigate
-    if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password) {
-      // simulate a tiny delay for UX consistency
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        navigate('/admin/portal');
-      }, 300);
-      return;
-    }
+    // // Quick local mock check: if using the demo credential, skip API and navigate
+    // if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password) {
+    //   // simulate a tiny delay for UX consistency
+    //   setLoading(true);
+    //   setTimeout(() => {
+    //     setLoading(false);
+    //     navigate('/admin/portal');
+    //   }, 300);
+    //   return;
+    // }
 
     try {
-      setLoading(true);
-      // TODO: adjust endpoint to match API repo
       const res = await axios.post('/api/admin/login', {
         username,
         password,
       });
-      // Example: navigate to admin dashboard after success
-      if (res.status >= 200 && res.status < 300) {
+
+      if (res.data?.token) {
+        localStorage.setItem('adminToken', res.data.token);
         navigate('/admin/portal');
+      } else {
+        setSubmitError('Unexpected response from server.');
       }
     } catch (e) {
-      setSubmitError(e?.response?.data?.message || 'Login failed.');
+      console.error('Login error:', e);
+      const message = e.response?.data?.error || e.message || 'Login failed.';
+      setSubmitError(message);
     } finally {
       setLoading(false);
     }
