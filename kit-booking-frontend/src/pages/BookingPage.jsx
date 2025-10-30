@@ -17,7 +17,7 @@ function BookingPage() {
 
   // Kits and quantities from KitSelectionPage
   const { kitQuantities = [] } = location.state || {};
-
+ //Hello 
   const [projectTitle, setProjectTitle] = useState("");
   const [date, setDate] = useState(dayjs());
   const [startTime, setStartTime] = useState(dayjs().hour(9).minute(0));
