@@ -7,7 +7,6 @@
 
 import * as React from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
@@ -84,8 +83,6 @@ const MOCK_BOOKINGS = [
 // This is the main React component for the admin portal.
 // It handles loading, displaying, and (eventually) fetching bookings.
 export default function AdminPortalPage() {
-  const navigate = useNavigate();
-
   // --- State management ---
   // bookings: holds our booking list
   // loading: shows a spinner when data is loading
@@ -97,35 +94,44 @@ export default function AdminPortalPage() {
   // --- Data fetching logic ---
   // This function will eventually call the real API.
   // For now, it's kept for future use when backend is ready.
-  React.useCallback(async () => {
+  const fetchBookings = React.useCallback(async () => {
     setError('');
     setLoading(true);
+
     try {
-      const res = await axios.get(BOOKINGS_API, { withCredentials: true });
-      // Expecting an array of bookings. Each booking example shape:
-      // { id, name, projectName, startTime, endTime, kits: [ { id, name, qty }, ... ] }
-      const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      const res = await axios.get(BOOKINGS_API);
+      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setBookings(data);
     } catch (e) {
-      const status = e?.response?.status;
-      if (status === 401 || status === 403) {
-        // Not authenticated; bounce to login
-        navigate('/admin', { replace: true });
-        return;
-      }
-      setError(e?.response?.data?.message || 'Failed to fetch bookings.');
+      console.error('Fetch error:', e);
+      setError(e?.response?.data?.error || 'Failed to fetch bookings.');
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
-// --- Simulate fetching data ---
-  // We use mock data here with a small delay so it feels realistic.
-  React.useEffect(() => {
-    setTimeout(() => {
-      setBookings(MOCK_BOOKINGS);
-      setLoading(false);
-    }, 500);
   }, []);
+
+  // 🔹 Load data on mount
+  React.useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
+
+  // --- Loading state ---
+  if (loading) {
+    return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+          <CircularProgress />
+        </Box>
+    );
+  }
+
+  // --- Error state ---
+  if (error) {
+    return (
+        <Box sx={{ p: 4 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+    );
+  }
 
   // --- UI layout ---
   // Displays the booking list in accordions.
