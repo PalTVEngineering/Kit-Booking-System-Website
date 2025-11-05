@@ -255,9 +255,6 @@ function ReturnPage() {
           <Typography variant="body1" sx={{ mt: 1 }}>
             Thank you for returning your equipment!
           </Typography>
-          <Typography variant="body2" sx={{ mt: 2 }} color="text.secondary">
-            Your booking and user record have been safely removed from the system.
-          </Typography>
         </Paper>
       )}
     </Container>
