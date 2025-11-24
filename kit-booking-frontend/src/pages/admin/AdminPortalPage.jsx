@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import axios from 'axios';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
@@ -22,11 +21,11 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import dayjs from 'dayjs';
+import { adminBookings } from "../../services/api";
 
 
 // The API endpoint where bookings would normally be fetched from
 // (right now I'm using mock data below for demo purposes)
-const BOOKINGS_API = '/api/admin/bookings'; // e.g. '/api/bookings' or '/api/admin/bookings?status=current'
 
 // Some fake bookings so we can see how the page looks without needing the backend yet.
 // Each booking has a name, project name, time, and a list of kits booked.
@@ -99,7 +98,7 @@ export default function AdminPortalPage() {
     setLoading(true);
 
     try {
-      const res = await axios.get(BOOKINGS_API);
+      const res = await adminBookings();
       const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setBookings(data);
     } catch (e) {

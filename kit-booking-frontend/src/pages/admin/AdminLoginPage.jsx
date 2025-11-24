@@ -5,7 +5,6 @@
  * Description: Admin login page built with Material UI + Axios + React Router.
  */
 import * as React from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -19,12 +18,16 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
+import { adminLogin } from "../../services/api";
+
 
 // --- Mock admin credential (for local/dev demo) ---
+/*
 const MOCK_ADMIN = {
   username: 'shawncui',
   password: '123456',
 };
+*/
 
 // This is the styled Card component that wraps the login form
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -105,21 +108,23 @@ export default function AdminLoginPage() {
     setSubmitError('');
     if (!validate()) return;
 
-    // // Quick local mock check: if using the demo credential, skip API and navigate
-    // if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password) {
-    //   // simulate a tiny delay for UX consistency
-    //   setLoading(true);
-    //   setTimeout(() => {
-    //     setLoading(false);
-    //     navigate('/admin/portal');
-    //   }, 300);
-    //   return;
-    // }
+    // Quick local mock check: if using the demo credential, skip API and navigate
+    /*
+    if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password && 1 ==2) {
+      // simulate a tiny delay for UX consistency
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        navigate('/admin/portal');
+      }, 300);
+      return;
+    }
+    */
 
     try {
-      const res = await axios.post('/api/admin/login', {
-        username,
-        password,
+      const res = await adminLogin({
+        "username":username,
+        "password":password,
       });
 
       if (res.data?.token) {
