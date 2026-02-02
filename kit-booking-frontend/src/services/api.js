@@ -14,6 +14,8 @@ export const fetchKits = () => API.get("/kit/");
 //Booking API Calls
 export const fetchBookings = () => API.get("/bookings/");
 export const createBooking = (data) => API.post("/bookings/create", data);
+export const deleteBooking = (data) => API.delete("/bookings/delete", {
+  data:{"bookingId":data.bookingId}}); //Example call: deleteBooking({bookingId:<id>})
 
 //Return API Calls
 export const findUserBookings = (data) =>
