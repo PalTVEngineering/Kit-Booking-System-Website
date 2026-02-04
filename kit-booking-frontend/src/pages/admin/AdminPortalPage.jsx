@@ -20,6 +20,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { adminBookings } from "../../services/api";
@@ -119,7 +122,12 @@ export default function AdminPortalPage() {
   React.useEffect(() => {
     fetchBookings();
   }, [fetchBookings]);
-
+  const getIcon = (type) => {
+      if (type.toLowerCase().includes("camera")) return <CameraAltIcon />;
+      if (type.toLowerCase().includes("sound")) return <MusicNoteIcon />;
+      if (type.toLowerCase().includes("light")) return <LightModeIcon />;
+      return <BuildIcon />;
+    };
   // --- Loading state ---
   if (loading) {
     return (
@@ -178,7 +186,7 @@ export default function AdminPortalPage() {
                 : dayjs(start).format('YYYY-MM-DD HH:mm')
               : 'Time: N/A';
             const kits = Array.isArray(b.kits) ? b.kits : (b.items || b.kit || []);
-
+            console.log('Booking kits:', kits);
             return (
               <Accordion key={b.id || `${name}-${start}`} disableGutters sx={{ mb: 1 }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -202,7 +210,7 @@ export default function AdminPortalPage() {
                         <React.Fragment key={k.id || idx}>
                           <ListItem>
                             <ListItemIcon>
-                              <Inventory2Icon />
+                              {getIcon(k.type) || <Inventory2Icon />}
                             </ListItemIcon>
                             <ListItemText
                               primary={k.name || k.title || 'Unnamed kit'}
