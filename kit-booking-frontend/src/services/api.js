@@ -4,6 +4,10 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
 });
 
+// Admin API Calls
+export const adminBookings = () => API.get("/admin/bookings");
+export const adminLogin = (data) => API.post("/admin/login", data);
+
 // Users API Calls
 export const fetchUsers = () => API.get("/user/");
 export const addUsers = (data) => API.post("/user/create_user", data);
