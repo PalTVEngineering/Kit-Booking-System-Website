@@ -127,8 +127,8 @@ export default function AdminLoginPage() {
         "password":password,
       });
 
-      if (res.data?.token) {
-        localStorage.setItem('adminToken', res.data.token);
+      if (res.status === 200 && res.data.success) {
+        // localStorage.setItem('adminToken', res.data.token);
         navigate('/admin/portal');
       } else {
         setSubmitError('Unexpected response from server.');

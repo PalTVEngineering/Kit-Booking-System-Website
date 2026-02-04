@@ -20,6 +20,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { adminBookings } from "../../services/api";
 
@@ -29,59 +30,60 @@ import { adminBookings } from "../../services/api";
 
 // Some fake bookings so we can see how the page looks without needing the backend yet.
 // Each booking has a name, project name, time, and a list of kits booked.
-const MOCK_BOOKINGS = [
-  {
-    id: 'BKG-1001',
-    name: 'John Smith',
-    projectName: 'Project Aurora',
-    startTime: '2025-10-21T09:30:00Z',
-    endTime: '2025-10-21T12:30:00Z',
-    kits: [
-      { id: 'KIT-1', name: 'Canon EOS R6', qty: 1 },
-      { id: 'KIT-2', name: 'Manfrotto Tripod', qty: 1 },
-      { id: 'KIT-3', name: 'LED Lighting Kit', qty: 2 },
-    ],
-  },
-  {
-    id: 'BKG-1002',
-    name: 'Alice Wong',
-    projectName: 'Student Promo',
-    startTime: '2025-10-21T13:00:00Z',
-    endTime: '2025-10-21T15:00:00Z',
-    kits: [{ id: 'KIT-4', name: 'Sony A7 IV', qty: 1 }],
-  },
-  {
-    id: 'BKG-1003',
-    name: 'Dept. Physics',
-    projectName: 'Lab Recording',
-    startTime: '2025-10-22T08:00:00Z',
-    endTime: '2025-10-22T17:00:00Z',
-    kits: [
-      { id: 'KIT-5', name: 'Zoom H6 Recorder', qty: 2 },
-      { id: 'KIT-6', name: 'Shotgun Microphone', qty: 2 },
-      { id: 'KIT-7', name: 'Gimbal Stabilizer', qty: 1 },
-    ],
-  },
-  {
-    id: 'BKG-1004',
-    name: 'Tom Baker',
-    projectName: null,
-    startTime: '2025-10-23T10:00:00Z',
-    kits: [{ id: 'KIT-8', name: 'GoPro HERO12', qty: 3 }],
-  },
-  {
-    id: 'BKG-1005',
-    name: 'Sara Lee',
-    projectName: 'Course Demo',
-    startTime: '2025-10-24T14:00:00Z',
-    endTime: '2025-10-24T16:00:00Z',
-    kits: [],
-  },
-];
+// const MOCK_BOOKINGS = [
+//   {
+//     id: 'BKG-1001',
+//     name: 'John Smith',
+//     projectName: 'Project Aurora',
+//     startTime: '2025-10-21T09:30:00Z',
+//     endTime: '2025-10-21T12:30:00Z',
+//     kits: [
+//       { id: 'KIT-1', name: 'Canon EOS R6', qty: 1 },
+//       { id: 'KIT-2', name: 'Manfrotto Tripod', qty: 1 },
+//       { id: 'KIT-3', name: 'LED Lighting Kit', qty: 2 },
+//     ],
+//   },
+//   {
+//     id: 'BKG-1002',
+//     name: 'Alice Wong',
+//     projectName: 'Student Promo',
+//     startTime: '2025-10-21T13:00:00Z',
+//     endTime: '2025-10-21T15:00:00Z',
+//     kits: [{ id: 'KIT-4', name: 'Sony A7 IV', qty: 1 }],
+//   },
+//   {
+//     id: 'BKG-1003',
+//     name: 'Dept. Physics',
+//     projectName: 'Lab Recording',
+//     startTime: '2025-10-22T08:00:00Z',
+//     endTime: '2025-10-22T17:00:00Z',
+//     kits: [
+//       { id: 'KIT-5', name: 'Zoom H6 Recorder', qty: 2 },
+//       { id: 'KIT-6', name: 'Shotgun Microphone', qty: 2 },
+//       { id: 'KIT-7', name: 'Gimbal Stabilizer', qty: 1 },
+//     ],
+//   },
+//   {
+//     id: 'BKG-1004',
+//     name: 'Tom Baker',
+//     projectName: null,
+//     startTime: '2025-10-23T10:00:00Z',
+//     kits: [{ id: 'KIT-8', name: 'GoPro HERO12', qty: 3 }],
+//   },
+//   {
+//     id: 'BKG-1005',
+//     name: 'Sara Lee',
+//     projectName: 'Course Demo',
+//     startTime: '2025-10-24T14:00:00Z',
+//     endTime: '2025-10-24T16:00:00Z',
+//     kits: [],
+//   },
+// ];
 
 // This is the main React component for the admin portal.
 // It handles loading, displaying, and (eventually) fetching bookings.
 export default function AdminPortalPage() {
+  const navigate = useNavigate();
   // --- State management ---
   // bookings: holds our booking list
   // loading: shows a spinner when data is loading
@@ -89,7 +91,7 @@ export default function AdminPortalPage() {
   const [bookings, setBookings] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
-
+  console.log(localStorage.getItem('adminToken'));
   // --- Data fetching logic ---
   // This function will eventually call the real API.
   // For now, it's kept for future use when backend is ready.
@@ -102,12 +104,16 @@ export default function AdminPortalPage() {
       const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setBookings(data);
     } catch (e) {
+      // If unauthorized, redirect to login
+      if (e.response.status === 401) {
+        navigate('/admin');
+      }
       console.error('Fetch error:', e);
       setError(e?.response?.data?.error || 'Failed to fetch bookings.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   // 🔹 Load data on mount
   React.useEffect(() => {
