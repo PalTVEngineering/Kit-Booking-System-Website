@@ -132,6 +132,7 @@ export default function AdminPortalPage() {
       // delete from DB
       await deleteBooking({ bookingId: id });
     } catch (e) {
+      document.getElementById(bookingId).style.display = "block"; // put it back if delete fails
       console.error("Error while deleting booking:", e);
       return;
     }
