@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -23,9 +24,12 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import Grid from '@mui/material/Grid';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { adminBookings } from "../../services/api";
+import { deleteBooking } from "../../services/api";
 
 
 // The API endpoint where bookings would normally be fetched from
@@ -118,6 +122,21 @@ export default function AdminPortalPage() {
     }
   }, [navigate]);
 
+  const handleDeleteBooking = async (bookingId) => {
+    try {
+      // booking is of the form "BKG-123", we need to extract the numeric ID for the API call
+      let id = bookingId.split("-")[1];
+      id = parseInt(id, 10);
+      // remove it from the UI 
+      document.getElementById(bookingId).style.display = "none";
+      // delete from DB
+      await deleteBooking({ bookingId: id });
+    } catch (e) {
+      console.error("Error while deleting booking:", e);
+      return;
+    }
+  }
+
   // 🔹 Load data on mount
   React.useEffect(() => {
     fetchBookings();
@@ -175,7 +194,7 @@ export default function AdminPortalPage() {
       {!loading && !error && bookings.length > 0 && (
         <Box>
           {bookings.map((b) => {
-            // extract and normalize fields (some might come from different API keys)
+            // extract and normalise fields (some might come from different API keys)
             const name = b.name || b.userName || b.requester || 'Unknown';
             const project = b.projectName || b.project || '';
             const start = b.startTime || b.start || b.bookingTime || b.from;
@@ -185,24 +204,60 @@ export default function AdminPortalPage() {
                 ? `${dayjs(start).format('YYYY-MM-DD HH:mm')} → ${dayjs(end).format('YYYY-MM-DD HH:mm')}`
                 : dayjs(start).format('YYYY-MM-DD HH:mm')
               : 'Time: N/A';
+            const status = b.status || "unknown";
             const kits = Array.isArray(b.kits) ? b.kits : (b.items || b.kit || []);
-            console.log('Booking kits:', kits);
+            console.log('Bookings:', bookings);
+            let colour = "#000000";
+            // Set colour based on status of booking
+            switch (status.toLowerCase()) {
+              case "active":
+                colour = "#1619db";
+                break;
+              case "closed(good)":
+                colour = "#25ae55";
+                break;
+              case "closed(missing)":
+                colour = "#db1616";
+                break;
+            }
             return (
-              <Accordion key={b.id || `${name}-${start}`} disableGutters sx={{ mb: 1 }}>
+              <Accordion id={b.id} key={b.id || `${name}-${start}`} disableGutters sx={{ mb: 1 }}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {name} {project ? `– ${project}` : ''}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {timeLabel}
-                    </Typography>
-                  </Box>
+                  <Grid container spacing={1} sx = {{ width: 1}}>
+                    <Grid size={9}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                          {name} {project ? `– ${project}` : ''}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {timeLabel}
+                        </Typography>
+                        <Typography variant="body2"  color={colour}>
+                          Status: {status}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid size={3} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: 3 }}>
+                      {/* Delete button for each booking */}
+                      <IconButton
+                        component="div"
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteBooking(b.id);
+                        }}
+                        color="error"
+                      >
+                        <DeleteForeverIcon />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
                 </AccordionSummary>
                 {/* When you click the booking, this expands to show what kits were booked. */}
                 <AccordionDetails>
                   <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    Kit booked
+                    Kit booked:
                   </Typography>
                   {kits && kits.length > 0 ? (
                     <List dense disablePadding>
