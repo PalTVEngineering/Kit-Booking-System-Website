@@ -32,60 +32,6 @@ import { adminBookings } from "../../services/api";
 import { deleteBooking } from "../../services/api";
 
 
-// The API endpoint where bookings would normally be fetched from
-// (right now I'm using mock data below for demo purposes)
-
-// Some fake bookings so we can see how the page looks without needing the backend yet.
-// Each booking has a name, project name, time, and a list of kits booked.
-// const MOCK_BOOKINGS = [
-//   {
-//     id: 'BKG-1001',
-//     name: 'John Smith',
-//     projectName: 'Project Aurora',
-//     startTime: '2025-10-21T09:30:00Z',
-//     endTime: '2025-10-21T12:30:00Z',
-//     kits: [
-//       { id: 'KIT-1', name: 'Canon EOS R6', qty: 1 },
-//       { id: 'KIT-2', name: 'Manfrotto Tripod', qty: 1 },
-//       { id: 'KIT-3', name: 'LED Lighting Kit', qty: 2 },
-//     ],
-//   },
-//   {
-//     id: 'BKG-1002',
-//     name: 'Alice Wong',
-//     projectName: 'Student Promo',
-//     startTime: '2025-10-21T13:00:00Z',
-//     endTime: '2025-10-21T15:00:00Z',
-//     kits: [{ id: 'KIT-4', name: 'Sony A7 IV', qty: 1 }],
-//   },
-//   {
-//     id: 'BKG-1003',
-//     name: 'Dept. Physics',
-//     projectName: 'Lab Recording',
-//     startTime: '2025-10-22T08:00:00Z',
-//     endTime: '2025-10-22T17:00:00Z',
-//     kits: [
-//       { id: 'KIT-5', name: 'Zoom H6 Recorder', qty: 2 },
-//       { id: 'KIT-6', name: 'Shotgun Microphone', qty: 2 },
-//       { id: 'KIT-7', name: 'Gimbal Stabilizer', qty: 1 },
-//     ],
-//   },
-//   {
-//     id: 'BKG-1004',
-//     name: 'Tom Baker',
-//     projectName: null,
-//     startTime: '2025-10-23T10:00:00Z',
-//     kits: [{ id: 'KIT-8', name: 'GoPro HERO12', qty: 3 }],
-//   },
-//   {
-//     id: 'BKG-1005',
-//     name: 'Sara Lee',
-//     projectName: 'Course Demo',
-//     startTime: '2025-10-24T14:00:00Z',
-//     endTime: '2025-10-24T16:00:00Z',
-//     kits: [],
-//   },
-// ];
 
 // This is the main React component for the admin portal.
 // It handles loading, displaying, and (eventually) fetching bookings.
@@ -98,7 +44,6 @@ export default function AdminPortalPage() {
   const [bookings, setBookings] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState('');
-  console.log(localStorage.getItem('adminToken'));
   // --- Data fetching logic ---
   // This function will eventually call the real API.
   // For now, it's kept for future use when backend is ready.
@@ -195,11 +140,11 @@ export default function AdminPortalPage() {
       {!loading && !error && bookings.length > 0 && (
         <Box>
           {bookings.map((b) => {
-            // extract and normalise fields (some might come from different API keys)
-            const name = b.name || b.userName || b.requester || 'Unknown';
-            const project = b.projectName || b.project || '';
-            const start = b.startTime || b.start || b.bookingTime || b.from;
-            const end = b.endTime || b.end || b.to;
+            // Extract booking details with fallbacks
+            const name = b.name || 'Unknown';
+            const project = b.projectName || '';
+            const start = b.startTime || 'Unknown';
+            const end = b.endTime || 'Unknown';
             const timeLabel = start
               ? end
                 ? `${dayjs(start).format('YYYY-MM-DD HH:mm')} → ${dayjs(end).format('YYYY-MM-DD HH:mm')}`
@@ -207,9 +152,8 @@ export default function AdminPortalPage() {
               : 'Time: N/A';
             const status = b.status || "unknown";
             const kits = Array.isArray(b.kits) ? b.kits : (b.items || b.kit || []);
-            console.log('Bookings:', bookings);
             let colour = "#000000";
-            // Set colour based on status of booking
+            // Set colour of status text depending on status value
             switch (status.toLowerCase()) {
               case "active":
                 colour = "#1619db";
@@ -266,6 +210,7 @@ export default function AdminPortalPage() {
                         <React.Fragment key={k.id || idx}>
                           <ListItem>
                             <ListItemIcon>
+                              {/*Show icon depending on type of kit (camera, lighting, etc.) */}
                               {getIcon(k.type) || <Inventory2Icon />}
                             </ListItemIcon>
                             <ListItemText

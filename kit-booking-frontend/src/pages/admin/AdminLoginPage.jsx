@@ -108,19 +108,6 @@ export default function AdminLoginPage() {
     setSubmitError('');
     if (!validate()) return;
 
-    // Quick local mock check: if using the demo credential, skip API and navigate
-    /*
-    if (username === MOCK_ADMIN.username && password === MOCK_ADMIN.password && 1 ==2) {
-      // simulate a tiny delay for UX consistency
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        navigate('/admin/portal');
-      }, 300);
-      return;
-    }
-    */
-
     try {
       const res = await adminLogin({
         "username":username,
@@ -128,7 +115,6 @@ export default function AdminLoginPage() {
       });
 
       if (res.status === 200 && res.data.success) {
-        // localStorage.setItem('adminToken', res.data.token);
         navigate('/admin/portal');
       } else {
         setSubmitError('Unexpected response from server.');
@@ -192,7 +178,6 @@ export default function AdminLoginPage() {
                 sx={{ mb: 2 }}
               />
             </FormControl>
-
 
             {/* The Sign In button (shows loading spinner when logging in) */}
             <Button type="submit" fullWidth variant="contained" disabled={loading}>
