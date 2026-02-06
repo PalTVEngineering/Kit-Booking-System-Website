@@ -9,6 +9,7 @@
 - navigate to directory code is ran in
 
 - Commands to run:
+     npm install @vitejs/plugin-react
      npm install react
      npm install vite
      npm run dev
